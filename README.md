@@ -9,7 +9,7 @@ patients.
 
 **Stack:** React · Node/Express · Flask · scikit-learn · MySQL · OpenAI
 
-**Built by:** [Deogracious Moriasi] — 4th year final project, 2025
+**Built by:** Deogracious Moriasi — 4th year final project, 2025
 
 **Status:** Working prototype. Not clinically validated. Local-only —
 the 8 GB model artifact exceeds free-tier hosting without quantization.
