@@ -1,7 +1,8 @@
 .banner-container {
     display: flex;
     padding: 50px;
-    background-color: rgba(62, 161, 255, 0.04);
+    background-color: #ecf4f7; ;
+    
 }
 
 .banner-content {
@@ -14,6 +15,8 @@
 
 .banner-heading>h2 {
     font-size: 52px;
+    font-weight: 700;
+    color: #174EB2;
 }
 
 .banner-subheading>p {
@@ -40,14 +43,16 @@
 }
 
 .banner-learn-button {
-    color: #174EB2;
-    background-color: #FFF;
+    background-color: #174EB2;
+    color: #FFF;
     border: 1px solid #174EB2;
+    width: fit-content;
+    height: fit-content;
 }
 
 .banner-learn-button:hover {
-    color: #FFF;
-    background-color: #174EB2;
+    color: #174EB2;
+    background-color: #fff;
 }
 
 .banner-graphic {
@@ -63,5 +68,6 @@
 .banner-graphic>img:last-child {
     width: 800px;
     position: absolute;
-    left: -180px;
+    left: -10px;
+    top: 70px;
 }

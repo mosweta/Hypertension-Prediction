@@ -22,4 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-
+.env
+models/*.pkl
+models/*.joblib
+oldmodels/*.pkl
+oldmodels/*.joblib

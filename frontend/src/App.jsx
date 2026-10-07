@@ -2,10 +2,26 @@ import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
+import axios from 'axios';
 
 function App() {
   const [count, setCount] = useState(0)
+axios.defaults.withCredentials = true;
+axios.defaults.baseURL = 'http://localhost:8081';
 
+
+const handleLogout = () => {
+  axios.post('/logout', {}, { withCredentials: true })
+    .then(() => {
+      console.log('Logged out successfully');
+      window.location.href = '/login';
+    })
+    .catch(error => {
+      console.error('Logout error:', error);
+      // Still redirect to login
+      window.location.href = '/login';
+    });
+};
   return (
     <>
       <div>
@@ -20,6 +36,9 @@ function App() {
       <div className="card">
         <button onClick={() => setCount((count) => count + 1)}>
           count is {count}
+        </button>
+        <button onClick={() => handleLogout()}>
+          Logout
         </button>
         <p>
           Edit <code>src/App.jsx</code> and save to test HMR

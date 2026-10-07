@@ -17,7 +17,7 @@ const Banner = () => {
                 </div>
 
                 <div className="banner-buttons">
-                    <button className="banner-appointment-button" href="/login">Login</button>
+                    <button className="banner-learn-button" href="/login">Login</button>
                     <button className="banner-learn-button">Learn More</button>
                 </div>
 

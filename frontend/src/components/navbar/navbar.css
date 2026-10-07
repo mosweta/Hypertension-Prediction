@@ -8,7 +8,7 @@
     width: 100%;
     background: var(--bg-color);
     z-index: 1000;
-    padding: 10px0px;
+    padding: 10px 0px;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
@@ -16,7 +16,7 @@
 .logo > img {
     background-color: var(--bg-color);
     position: absolute;
-    width: 90px;
+    width: 200px;
     height: fit-content;
     cursor: pointer;
     border-radius: 20px;
@@ -70,6 +70,7 @@
     cursor: pointer;
     font-size: 16px;
     color: #174EB2;
+    color: #000;
     transition: color 0.3s ease;
 }
 

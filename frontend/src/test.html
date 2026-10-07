@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedPredict - Doctor Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-light: #3b82f6;
+            --primary-dark: #1d4ed8;
+            --secondary: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--gray-50);
+            color: var(--gray-800);
+            line-height: 1.6;
+        }
+
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        } 
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 260px;
+            background: linear-gradient(180deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 1.5rem 1rem;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding: 0 0.5rem;
+        }
+
+        .logo i {
+            font-size: 1.8rem;
+            margin-right: 0.75rem;
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .nav-links {
+            list-style: none;
+        }
+
+        .nav-links li {
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-links a {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            color: rgba(255, 255, 255, 0.85);
+            text-decoration: none;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .nav-links i {
+            margin-right: 0.75rem;
+            font-size: 1.2rem;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            margin-left: 260px;
+            padding: 2rem;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .welcome-section h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--gray-800);
+            margin-bottom: 0.5rem;
+        }
+
+        .welcome-section p {
+            color: var(--gray-600);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        /* Stats Cards */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background-color: white;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .stat-icon.patients {
+            background-color: rgba(37, 99, 235, 0.1);
+            color: var(--primary);
+        }
+
+        .stat-icon.predictions {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: var(--secondary);
+        }
+
+        .stat-icon.pending {
+            background-color: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        .stat-info h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-info p {
+            color: var(--gray-500);
+            font-size: 0.875rem;
+        }
+
+        /* Patient Table */
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .card-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-header h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background-color: var(--gray-50);
+        }
+
+        th {
+            padding: 1rem 1.5rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--gray-700);
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        td {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-low {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: var(--secondary);
+        }
+
+        .status-medium {
+            background-color: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        .status-high {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+        }
+
+        .btn-sm {
+            padding: 0.375rem 0.75rem;
+            font-size: 0.75rem;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--gray-300);
+            color: var(--gray-700);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--gray-50);
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--gray-200);
+        }
+
+        .pagination-info {
+            color: var(--gray-600);
+            font-size: 0.875rem;
+        }
+
+        .pagination-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: 0.75rem;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--gray-500);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--gray-700);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--gray-300);
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            transition: border-color 0.2s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .modal-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 80px;
+                padding: 1rem 0.5rem;
+            }
+            
+            .logo h1, .nav-links span {
+                display: none;
+            }
+            
+            .logo {
+                justify-content: center;
+                margin-bottom: 1.5rem;
+            }
+            
+            .logo i {
+                margin-right: 0;
+            }
+            
+            .nav-links a {
+                justify-content: center;
+                padding: 0.75rem;
+            }
+            
+            .nav-links i {
+                margin-right: 0;
+                font-size: 1.4rem;
+            }
+            
+            .main-content {
+                margin-left: 80px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 1rem;
+            }
+            
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+            
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style> 
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">
+                <i class="fas fa-heartbeat"></i>
+                <h1>MedPredict</h1>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#" class="active"><i class="fas fa-home"></i> <span>Dashboard</span></a></li>
+                <li><a href="#"><i class="fas fa-user-injured"></i> <span>Patients</span></a></li>
+                <li><a href="#"><i class="fas fa-chart-bar"></i> <span>Analytics</span></a></li>
+                <li><a href="#"><i class="fas fa-cog"></i> <span>Settings</span></a></li>
+                <li><a href="#"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a></li>
+            </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <div class="welcome-section">
+                    <h2>Welcome, Dr. Smith!</h2>
+                    <p>Ready to make today productive?</p>
+                </div>
+                <div class="user-info">
+                    <div class="user-avatar">DS</div>
+                </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="stats-container">
+                <div class="stat-card">
+                    <div class="stat-icon patients">
+                        <i class="fas fa-user-injured"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>142</h3>
+                        <p>Total Patients</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon predictions">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>24</h3>
+                        <p>Predictions Today</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon pending">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>8</h3>
+                        <p>Pending Reviews</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Patient Table -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>Patient List</h3>
+                    <div>
+                        <button class="btn btn-outline"><i class="fas fa-filter"></i> Filter</button>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Patient ID</th>
+                                <th>Name</th>
+                                <th>Age</th>
+                                <th>Condition</th>
+                                <th>Last Visit</th>
+                                <th>Risk Level</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>#P-1001</td>
+                                <td>John Anderson</td>
+                                <td>45</td>
+                                <td>Hypertension</td>
+                                <td>May 12, 2023</td>
+                                <td><span class="status-badge status-low">Low</span></td>
+                                <td>
+                                    <button class="btn btn-primary btn-sm predict-btn" data-patient-id="1001" data-patient-name="John Anderson">
+                                        <i class="fas fa-brain"></i> Predict
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>#P-1002</td>
+                                <td>Sarah Johnson</td>
+                                <td>62</td>
+                                <td>Diabetes</td>
+                                <td>May 10, 2023</td>
+                                <td><span class="status-badge status-medium">Medium</span></td>
+                                <td>
+                                    <button class="btn btn-primary btn-sm predict-btn" data-patient-id="1002" data-patient-name="Sarah Johnson">
+                                        <i class="fas fa-brain"></i> Predict
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>#P-1003</td>
+                                <td>Michael Chen</td>
+                                <td>58</td>
+                                <td>Cardiovascular</td>
+                                <td>May 8, 2023</td>
+                                <td><span class="status-badge status-high">High</span></td>
+                                <td>
+                                    <button class="btn btn-primary btn-sm predict-btn" data-patient-id="1003" data-patient-name="Michael Chen">
+                                        <i class="fas fa-brain"></i> Predict
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>#P-1004</td>
+                                <td>Emily Rodriguez</td>
+                                <td>34</td>
+                                <td>Asthma</td>
+                                <td>May 5, 2023</td>
+                                <td><span class="status-badge status-low">Low</span></td>
+                                <td>
+                                    <button class="btn btn-primary btn-sm predict-btn" data-patient-id="1004" data-patient-name="Emily Rodriguez">
+                                        <i class="fas fa-brain"></i> Predict
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>#P-1005</td>
+                                <td>Robert Williams</td>
+                                <td>71</td>
+                                <td>Arthritis</td>
+                                <td>May 3, 2023</td>
+                                <td><span class="status-badge status-medium">Medium</span></td>
+                                <td>
+                                    <button class="btn btn-primary btn-sm predict-btn" data-patient-id="1005" data-patient-name="Robert Williams">
+                                        <i class="fas fa-brain"></i> Predict
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination">
+                    <div class="pagination-info">
+                        Showing 1 to 5 of 142 patients
+                    </div>
+                    <div class="pagination-controls">
+                        <button class="btn btn-outline"><i class="fas fa-chevron-left"></i></button>
+                        <button class="btn btn-outline">1</button>
+                        <button class="btn btn-outline">2</button>
+                        <button class="btn btn-outline">3</button>
+                        <button class="btn btn-outline"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Prediction Modal -->
+    <div class="modal" id="predictionModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Patient Risk Prediction</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="patientId">Patient ID</label>
+                    <input type="text" id="patientId" class="form-control" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="patientName">Patient Name</label>
+                    <input type="text" id="patientName" class="form-control" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="clinicalData">Clinical Data</label>
+                    <textarea id="clinicalData" class="form-control" placeholder="Enter patient clinical data, symptoms, and test results..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="riskProbability">Risk Probability</label>
+                    <input type="text" id="riskProbability" class="form-control" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="riskLevel">Risk Level</label>
+                    <input type="text" id="riskLevel" class="form-control" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="llmReport">LLM Analysis Report</label>
+                    <textarea id="llmReport" class="form-control" readonly></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="recommendations">Recommendations</label>
+                    <textarea id="recommendations" class="form-control" readonly></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="doctorNotes">Doctor Notes</label>
+                    <textarea id="doctorNotes" class="form-control" placeholder="Add your clinical notes and observations..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="cancelBtn">Cancel</button>
+                <button class="btn btn-primary" id="approveBtn">Approve & Save</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Modal functionality
+        const modal = document.getElementById('predictionModal');
+        const predictButtons = document.querySelectorAll('.predict-btn');
+        const closeModal = document.querySelector('.close-modal');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const approveBtn = document.getElementById('approveBtn');
+        
+        // Open modal when predict button is clicked
+        predictButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const patientId = this.getAttribute('data-patient-id');
+                const patientName = this.getAttribute('data-patient-name');
+                
+                document.getElementById('patientId').value = `#P-${patientId}`;
+                document.getElementById('patientName').value = patientName;
+                
+                // Simulate API call to get prediction data
+                simulatePrediction(patientId);
+                
+                modal.style.display = 'flex';
+            });
+        });
+        
+        // Close modal
+        function closeModalFunc() {
+            modal.style.display = 'none';
+        }
+        
+        closeModal.addEventListener('click', closeModalFunc);
+        cancelBtn.addEventListener('click', closeModalFunc);
+        
+        // Approve button functionality
+        approveBtn.addEventListener('click', function() {
+            const doctorNotes = document.getElementById('doctorNotes').value;
+            
+            if (!doctorNotes.trim()) {
+                alert('Please add your clinical notes before approving.');
+                return;
+            }
+            
+            // In a real application, this would send data to the backend
+            alert('Prediction approved and saved successfully!');
+            closeModalFunc();
+        });
+        
+        // Simulate prediction API call
+        function simulatePrediction(patientId) {
+            // Show loading state
+            document.getElementById('riskProbability').value = 'Calculating...';
+            document.getElementById('riskLevel').value = 'Processing...';
+            document.getElementById('llmReport').value = 'Generating analysis...';
+            document.getElementById('recommendations').value = 'Creating recommendations...';
+            
+            // Simulate API delay
+            setTimeout(() => {
+                // Mock data based on patient ID
+                let riskProbability, riskLevel, llmReport, recommendations;
+                
+                if (patientId === '1001') {
+                    riskProbability = '23%';
+                    riskLevel = 'Low';
+                    llmReport = 'Patient shows mild symptoms with no significant risk factors. Blood pressure is well-controlled with current medication. No concerning trends in recent lab results.';
+                    recommendations = '["Continue current medication regimen", "Follow up in 3 months", "Maintain low-sodium diet", "Regular exercise 30 mins daily"]';
+                } else if (patientId === '1002') {
+                    riskProbability = '64%';
+                    riskLevel = 'Medium';
+                    llmReport = 'Patient has elevated HbA1c levels and recent weight gain. Blood glucose control has been suboptimal over the past month. Moderate risk of complications.';
+                    recommendations = '["Adjust insulin dosage as per new schedule", "Refer to nutritionist for dietary plan", "Increase physical activity to 45 mins daily", "Schedule follow-up in 2 weeks"]';
+                } else if (patientId === '1003') {
+                    riskProbability = '87%';
+                    riskLevel = 'High';
+                    llmReport = 'Patient presents with multiple risk factors including high cholesterol, family history, and elevated blood pressure. ECG shows minor abnormalities. High risk of cardiovascular event.';
+                    recommendations = '["Immediate cardiology consultation", "Start statin therapy", "24-hour blood pressure monitoring", "Cardiac stress test scheduled"]';
+                } else {
+                    riskProbability = '42%';
+                    riskLevel = 'Medium';
+                    llmReport = 'Patient shows moderate risk factors with some abnormal lab values. Further monitoring required to assess progression.';
+                    recommendations = '["Additional diagnostic tests needed", "Lifestyle modification counseling", "Follow-up in 1 month", "Monitor symptoms daily"]';
+                }
+                
+                document.getElementById('riskProbability').value = riskProbability;
+                document.getElementById('riskLevel').value = riskLevel;
+                document.getElementById('llmReport').value = llmReport;
+                document.getElementById('recommendations').value = recommendations;
+            }, 1500);
+        }
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target === modal) {
+                closeModalFunc();
+            }
+        });
+    </script>
+</body>
+</html>

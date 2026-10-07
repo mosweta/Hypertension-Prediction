@@ -17,13 +17,13 @@ const Facilities = () => {
                     <p>Providing essential resources for the diagnosis, treatment, and management of various medical conditions. These facilities encompass a wide range of settings, from hospitals and clinics to diagnostic laboratories and rehabilitation centers. In this article, we will explore the vital role that clinical facilities play in delivering high-quality healthcare and improving patient outcomes</p>
                 </div>
                 <div className="facility-detail-button">
-                    <button>Find Out More</button>
+                    
                 </div>
             </div>
 
             <div className="facility-images">
                 <img className="facility1" src={facility1} alt="facility1" />
-                <img className="facility2" src={facility2} alt="facility2" />
+                
             </div>
 
         </div>

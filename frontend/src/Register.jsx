@@ -246,6 +246,7 @@ function Registration() {
 
                     <button 
                         type="submit" 
+                        
                         className={`submit-btn ${loading ? 'loading' : ''}`}
                         disabled={loading}
                     >

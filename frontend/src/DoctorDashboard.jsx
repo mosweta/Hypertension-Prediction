@@ -1,70 +1,45 @@
-// src/components/NurseDashboard.js
+// src/components/DoctorDashboard.js
 import React, { useState, useEffect } from 'react';
-import PatientList from './patientList';
-import VitalSignsModal from './vitalSignsModal';
-//import MedicationSchedule from './MedicationSchedule';
-import QuickActions from './QuickActions';
+import PatientTable from './PatientTable';
+import PatientPrediction from "./PatientPrediction";
 import StatsCards from './StatsCards';
-import './NurseDashboard.css';
-  import { useNavigate } from 'react-router-dom';
+import "./nurseDashboard.css";
+import PatientList from './patientList';
+import PredictTable from './PredictTable';
 import axios from 'axios';
-
-const NurseDashboard = () => {
-  const [patients, setPatients] = useState([]);
-  const [selectedPatient, setSelectedPatient] = useState(null);
-  const [showVitalSignsModal, setShowVitalSignsModal] = useState(false);
-  const [activeTab, setActiveTab] = useState('overview');
-  const [loading, setLoading] = useState(true);
-  const [doctorName, setDoctorName] = useState(null)
-  const [doctorName2, setDoctorName2] = useState(null)
-
 
 axios.defaults.withCredentials = true;
 axios.defaults.baseURL = 'http://localhost:8081';
 
+const DoctorDashboard = () => {
+  const [patients, setPatients] = useState([]);
+  const [selectedPatient, setSelectedPatient] = useState(null);
+  const [showPredictionModal, setShowPredictionModal] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [doctorName, setDoctorName] = useState(null)
+    const [doctorName2, setDoctorName2] = useState(null)
+
   useEffect(() => {
     fetchPatients();
-    fetchTodaysTasks();
-  }, []);
+  }, [currentPage]);
 
   const fetchPatients = async () => {
     try {
-      const response = await fetch('/viewPatients');
+      setLoading(true);
+      const response = await fetch(`http://localhost:5000/api/patients?page=${currentPage}&limit=10`);
       const data = await response.json();
-      setPatients(data);
+      setPatients(data.patients);
+      setTotalPages(data.totalPages);
     } catch (error) {
       console.error('Error fetching patients:', error);
     } finally {
       setLoading(false);
     }
   };
-const handleLogout = () => {
-  axios.post('/logout', {}, { withCredentials: true })
-    .then(() => {
-      console.log('Logged out successfully');
-      window.location.href = '/login';
-    })
-    .catch(error => {
-      console.error('Logout error:', error);
-      // Still redirect to login
-      window.location.href = '/login';
-    });
-};
-  const fetchTodaysTasks = async () => {
-    try {
-      const response = await fetch('http://localhost:5000/api/nurse/tasks');
-      const data = await response.json();
-      // Handle tasks data
-    } catch (error) {
-      console.error('Error fetching tasks:', error);
-    }
-  };
-
-  const handleVitalSigns = (patient) => {
-    setSelectedPatient(patient);
-    setShowVitalSignsModal(true);
-  };
-useEffect(() => {
+  useEffect(() => {
     const fetchCurrentUser = async () => {
       try {
         const response = await axios.get("/me", {
@@ -100,46 +75,48 @@ useEffect(() => {
 
     fetchCurrentUserl();
   }, []);
-  const handleUpdateVitalSigns = async (vitalData) => {
+  const handlePredict = (patient) => {
+    setSelectedPatient(patient);
+    setShowPredictionModal(true);
+  };
+  const handleLogout = () => {
+  axios.post('http://localhost:8081/logout', {}, { withCredentials: true })
+    .then(() => {
+      console.log('Logged out successfully');
+      window.location.href = 'http://localhost:5173/login';
+    })
+    .catch(error => {
+      console.error('Logout error:', error);
+      // Still redirect to login
+      window.location.href = '/login';
+    });
+};
+  const handleApprovePrediction = async (predictionData) => {
     try {
-      const response = await fetch('http://localhost:5000/api/nurse/vital-signs', {
+      const response = await fetch('http://localhost:5000/api/predictions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          patientId: selectedPatient.patient_id,
-          ...vitalData
-        }),
+        body: JSON.stringify(predictionData),
       });
 
       if (response.ok) {
-        alert('Vital signs updated successfully!');
-        setShowVitalSignsModal(false);
+        alert('Prediction approved and saved successfully!');
+        setShowPredictionModal(false);
+        setSelectedPatient(null);
         fetchPatients(); // Refresh data
+      } else {
+        throw new Error('Failed to save prediction');
       }
     } catch (error) {
-      console.error('Error updating vital signs:', error);
-      alert('Error updating vital signs');
-    }
-  };
-
-  const handleMedicationAdministered = async (medicationId) => {
-    try {
-      const response = await fetch(`http://localhost:5000/api/nurse/medications/${medicationId}/administer`, {
-        method: 'POST',
-      });
-
-      if (response.ok) {
-        alert('Medication marked as administered!');
-        fetchTodaysTasks();
-      }
-    } catch (error) {
-      console.error('Error updating medication:', error);
+      console.error('Error saving prediction:', error);
+      alert('Error saving prediction. Please try again.');
     }
   };
 
   return (
+    
     <div className="nurse-dashboard">
       {/* Sidebar */}
       <div className="sidebar">
@@ -150,12 +127,12 @@ useEffect(() => {
         <ul className="nav-links">
           <li>
             <a 
-              href="#overview" 
-              className={activeTab === 'overview' ? 'active' : ''}
-              onClick={() => setActiveTab('overview')}
+              href="#dashboard" 
+              className={activeTab === 'dashboard' ? 'active' : ''}
+              onClick={() => setActiveTab('dashboard')}
             >
               <i className="fas fa-tachometer-alt"></i>
-              <span>Overview</span>
+              <span>Dashboard</span>
             </a>
           </li>
           <li>
@@ -188,18 +165,18 @@ useEffect(() => {
               <span>Tasks</span>
             </a>
           </li> */}
-           {/* <li>
-            <a href="#inpatients" className={activeTab === 'inpatients' ? 'active' : ''}
-               onClick={() => setActiveTab('inpatients')}>
+           <li>
+            <a href="#predictions" className={activeTab === 'predictions' ? 'active' : ''}
+               onClick={() => setActiveTab('predictions')}>
               <i className="fas fa-procedures"></i>
-              <span>In-Patients</span>
+              <span>Predictions</span>
             </a>
           </li>
-          <li>
+          {/* <li>
             <a href="#vitals" className={activeTab === 'vitals' ? 'active' : ''}
                onClick={() => setActiveTab('vitals')}>
               <i className="fas fa-heartbeat"></i>
-              <span>Vital Signs</span>
+              <span>Triage</span>
             </a>
           </li> */}
            <li>
@@ -220,8 +197,8 @@ useEffect(() => {
       <div className="main-content">
         <div className="header">
           <div className="welcome-section">
-            <h2>Welcome, {doctorName} {doctorName2} 👋</h2>
-            <p>Ready for your shift?</p>
+            <h2>Welcome, {doctorName} {doctorName2} 👋 </h2>
+            <p>Ready to make your day productive?</p>
           </div>
           <div className="user-info">
             <div className="user-avatar">
@@ -235,14 +212,14 @@ useEffect(() => {
 
         {/* Tab Content */}
         <div className="tab-content">
-          {activeTab === 'overview' && (
+          {activeTab === 'dashboard' && (
             <div className="overview-tab">
               <div className="card">
                 <div className="card-header">
-                  <h3>Recent Patients</h3>
+                  <h3>Pending Predictions</h3>
                 </div>
                 {/* PatientList now handles its own data fetching */}
-                <PatientList compact={false} showActions={true} />
+                <PredictTable compact={false} showActions={true} />
               </div>
             </div>
           )}
@@ -250,7 +227,7 @@ useEffect(() => {
           {activeTab === 'patients' && (
             <div className="patients-tab">
               {/* Full patient list - self-contained */}
-              <PatientList compact={false} showActions={true} />
+              <PatientTable compact={false} showActions={true} />
             </div>
           )}
 
@@ -258,10 +235,22 @@ useEffect(() => {
             <div className="vitals-tab">
               <div className="card">
                 <div className="card-header">
-                  <h3>Vital Signs Recording</h3>
+                  <h3>Triage Data</h3>
                 </div>
                 <div className="card-body">
-                  <p>Select a patient from the Patients tab to record vital signs.</p>
+                  
+                </div>
+              </div>
+            </div>
+          )}
+           {activeTab === 'predictions' && (
+            <div className="vitals-tab">
+              <div className="card">
+                <div className="card-header">
+                  <h3>All Predictions</h3>
+                </div>
+                <div className="card-body">
+                  
                 </div>
               </div>
             </div>
@@ -269,7 +258,8 @@ useEffect(() => {
         </div>
       </div>
     </div>
+   
   );
 };
 
-export default NurseDashboard;
+export default DoctorDashboard;

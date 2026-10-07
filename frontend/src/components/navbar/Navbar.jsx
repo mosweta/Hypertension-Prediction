@@ -100,18 +100,13 @@ const toggleTheme = () => {
         />
       </div>
 
-      <div className="side-nav-items">
-        <button onClick={toggleTheme} id="themeToggle">
-          {theme === "dark" ? "☀️" : "🌙"}
-        </button>
-      </div>
-
+      
       <div className="side-nav-items">
         <button onClick={() => navigate("/login")} className="navbarBtn">
           Login
         </button>
 
-        <img src={search} alt="search" />
+        
       </div>
     </div>
   );

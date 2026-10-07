@@ -61,27 +61,58 @@ export default function Login() {
     }
   }, [step]);
 
-  // OTP input handling
-  const handleOtpChange = (index, value) => {
-    if (/^\d?$/.test(value)) {
-      const newOtp = [...otp];
-      newOtp[index] = value;
-      setOtp(newOtp);
+ // 1. Combine OTP digits into one string
+const getOtpString = () => otp.join("");
 
-      // Auto-focus next input
-      if (value && index < 5) {
-        otpInputRefs.current[index + 1].focus();
-      }
-    }
-  };
+// 2. Handle OTP typing
+const handleOtpChange = (index, value) => {
+  if (!/^\d?$/.test(value)) return;
 
-  const handleOtpKeyDown = (index, e) => {
-    if (e.key === "Backspace" && !otp[index] && index > 0) {
-      otpInputRefs.current[index - 1].focus();
-    }
-  };
+  const newOtp = [...otp];
+  newOtp[index] = value;
+  setOtp(newOtp);
 
-  const getOtpString = () => otp.join("");
+  if (value && index < otp.length - 1) {
+    otpInputRefs.current[index + 1]?.focus();
+  }
+};
+
+// 3. Handle Backspace navigation
+const handleOtpKeyDown = (index, e) => {
+  if (e.key === "Backspace" && !otp[index] && index > 0) {
+    otpInputRefs.current[index - 1]?.focus();
+  }
+};
+
+// 4. Handle Paste (full OTP)
+const handleOtpPaste = (e) => {
+  e.preventDefault();
+
+  const pasted = e.clipboardData
+    .getData("text")
+    .replace(/\D/g, "")
+    .slice(0, otp.length);
+
+  if (!pasted) return;
+
+  const newOtp = [...otp];
+  pasted.split("").forEach((digit, i) => {
+    newOtp[i] = digit;
+  });
+
+  setOtp(newOtp);
+
+  const focusIndex = pasted.length < otp.length ? pasted.length : otp.length - 1;
+  otpInputRefs.current[focusIndex]?.focus();
+};
+
+// 5. Auto-submit when all digits filled (SAFE WAY)
+useEffect(() => {
+  if (otp.every(digit => digit !== "")) {
+    handleVerifyOtp({ preventDefault: () => {} });
+  }
+}, [otp]);
+
 
   // LOGIN flow
   const handleLogin = async (e) => {
@@ -258,7 +289,7 @@ export default function Login() {
             <input 
               type="email" 
               required 
-              placeholder=" "
+              
               value={lvalues.EmailAddress}
               onChange={e => setLValues({ ...lvalues, EmailAddress: e.target.value })} 
             />
@@ -270,7 +301,7 @@ export default function Login() {
             <input 
               type="password" 
               required 
-              placeholder=" "
+            
               value={lvalues.Password}
               onChange={e => setLValues({ ...lvalues, Password: e.target.value })} 
             />
@@ -319,6 +350,7 @@ export default function Login() {
                 onChange={(e) => handleOtpChange(index, e.target.value)}
                 onKeyDown={(e) => handleOtpKeyDown(index, e)}
                 className="otp-input"
+                onPaste={handleOtpPaste}
               />
             ))}
           </div>
